@@ -1,0 +1,16 @@
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 10px;
+  width: 320px;
+  height: 320px;
+  margin: 100px auto;
+} 
+
+.box {
+  width: 100px;
+  height: 100px;
+  background-color: white;
+  border: 1px solid black;
+}
