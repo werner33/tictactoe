@@ -4,30 +4,50 @@ import './App.css'
 
 function App() {
 
-  const [isTurnOfX, setIsTurnOfX] = useState(true);
+  const [isTurnOfX, setIsTurnOfX] = useState(false);
+  const [winner, setWinner] = useState(false);
+  const [draw, setDraw] = useState(false);
   const [board, setBoard] = useState([
     [0,0,0],
     [0,0,0],
     [0,0,0]
   ])
 
+  // improvements
+    // make each box its own component
+    // keep track of how many times x or o have won
+    // make the board dynamic so it can be 4x4 or nxn (any number)
+      // score m (some number smaller than n) consecutive X's or O's
+    // add some beautiful styling (make your own or go find a design)
+    // add a header and footer
+    // add router
+      // add a about page
+      // put another game on a different page
+
+  // advanced improvements 
+      // make it multiplayer on separate browsers
+      // introduce an AI for the computer player
+  
+  // other games like this
+    // hangman
+    // connect four
+    // boxes
+    // minesweeper (advanced)
+
   // 9x9 board
     // single square
       // can be blank, x or o
       // can be clicked only once per game
-  // reset button 
+  // reset button
   // after each new box is clikced
     // check for winner
       // row
       // column
       // diagonal
     // check for draw
-  // state for has a winner
+    // show draw state in DOM
+  // state for has a winner 
     // if true you cant click any more boxes
-
-
-  // add an on click event
-   // how will we know if 'x' or 'o' is clicking?
 
   const selectBox = (e) => {
     
@@ -37,100 +57,92 @@ function App() {
     const column = Number(selectedBoxId.split('x')[1]);
 
     // what needs to be true about the click? to update the board
-    if(typeof board[row][column] === 'string'){
+    if(winner || typeof board[row][column] === 'string'){
       // do nothing
       return;
     }
 
-    // update the state
-    // setBoard([['X','X', 'X'],['X','X', 'X'],['X','X', 'X']]); 
+    setBoard((board) => {
+      // copy of the board
+      const tempBoard = board.map(row => row.slice());
+      tempBoard[row][column] = isTurnOfX ? 'X' : 'O';
 
-    if(isTurnOfX){
-      board[row][column] = 'X';
-    } else {
-      // else set to O
-      board[row][column] = 'O';
-    }
-
-    console.log('updated board before setting state', board)
-
-    let tempBoard = board;
-    setBoard(tempBoard);
-
-    console.log('updated board after setting state', board)
-
-    
-    // setBoard(board => {
-    //   // if x, set to x
-    //   if(isTurnOfX){
-    //     board[row][column] = 'X';
-    //   } else {
-    //     // else set to O
-    //     board[row][column] = 'O';
-    //   }
-      
-    //   // return the updated board
-    //   return board;
-    // })
+      return tempBoard;
+    });
   }
-
-  // console.log(board)
-
 
   useEffect(() => {
-    // do what? 
-    const hasWinner = checkForWinner(board)
-    console.log(hasWinner);
-    console.log('board changed from use effect');
-    updatePlayerTurn()
+    const characterToCheck = isTurnOfX ? 'X' : 'O';
+    const hasWinner = checkForWinner(board, characterToCheck)
+    // update state with a winner
+    if(hasWinner){
+      setWinner(characterToCheck); // 'X', 'O'
+    } else {
+      // check for draw
+      // flatten the matrix and count how many zeros
+      const flatBoard = board.flat();
+      const countOfZeros = flatBoard.filter(el => el === 0).length;
+      if(countOfZeros === 0) setDraw(true);
+    }
+
+    setIsTurnOfX(!isTurnOfX);
   }, [board])
 
-  const updatePlayerTurn = () => {
-     //update the turn to the opposite of whoever slected last
-     setIsTurnOfX(!isTurnOfX);
-  }
 
-
-  function checkForWinner (board) {
+  function checkForWinner (board, char) {
     // first row
-    if(board[0][0] === board[0][1] === board[0][2]){
+    if(board[0].every(el => el === char)){
       return true;
     }
     // second row
-    if(board[1][0] === board[1][1] === board[1][2]){
+    if(board[1].every(el => el === char )){
       return true;
     }
     // third row
-    if(board[2][0] === board[2][1] === board[2][2]){
+    if(board[2].every(el => el === char )){
       return true;
     }
   
     // columns
-    if(board[0][0] === board[1][0] === board[2][0]){
+    if(board[0][0] === char && board[0][0] === board[1][0] && board[1][0] === board[2][0]){
       return true;
     }
-    if(board[0][1] === board[1][1] === board[2][1]){
+    if(board[0][1] === char && board[0][1] === board[1][1] && board[1][1] === board[2][1]){
       return true;
     }
-    if(board[0][2] === board[1][2] === board[2][2]){
+
+    if(board[0][2] === char && board[0][2] === board[1][2] && board[1][2] === board[2][2]){
       return true;
     }
   
     // top left to bottom right
-    if(board[0][0] === board[1][1] === board[2][2]){
+    if(board[0][0] === char && board[0][0] === board[1][1] && board[1][1] === board[2][2]){
       return true;
     }
     // top right to bottom left
-    if(board[0][2] === board[1][1] === board[2][0]){
+    if(board[0][2] === char && board[0][2] === board[1][1] && board[1][1] === board[2][0]){
       return true;
     }
   
     return false;
   }
 
+  const resetBoard = () => {
+    setBoard([
+      [0,0,0],
+      [0,0,0],
+      [0,0,0]
+    ]);
+    setIsTurnOfX(false);
+    setWinner(false);
+    setDraw(false);
+  }
 
   return (
     <div className="app">
+      {winner && <div>Winner: winner</div>}
+      {draw && <div>Your game ended in a draw!</div>}
+      <div className="reset-button" onClick={resetBoard}>Reset</div>
       <div className="board">
         {board.map((row, rowIndex) => {
            return row.map((selection, index) => {
@@ -150,12 +162,5 @@ function App() {
     </div>
   )
 }
-
-// 0 * 3 + 1
-// 0 * 3 + 2
-// 0 * 3 + 3
-// 1 * 3 + 1 = 4
-// 1 * 3 + 2 = 5
-// 1 * 3 + 3 = 6
 
 export default App
