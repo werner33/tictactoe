@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 
 import './App.css'
 
@@ -36,30 +36,98 @@ function App() {
     const row = Number(selectedBoxId.split('x')[0]);
     const column = Number(selectedBoxId.split('x')[1]);
 
-    // what needs to be truw about the click? to update the board
+    // what needs to be true about the click? to update the board
     if(typeof board[row][column] === 'string'){
       // do nothing
       return;
     }
 
     // update the state
-    setBoard(board => {
-      // if x, set to x
-      if(isTurnOfX){
-        board[row][column] = 'X';
-      } else {
-        // else set to O
-        board[row][column] = 'O';
-      }
-      //update the turn to the opposite of whoever slected last
-      setIsTurnOfX(!isTurnOfX);
+    // setBoard([['X','X', 'X'],['X','X', 'X'],['X','X', 'X']]); 
 
-      // return the updated board
-      return board;
-    });
+    if(isTurnOfX){
+      board[row][column] = 'X';
+    } else {
+      // else set to O
+      board[row][column] = 'O';
+    }
 
-    console.log(board);    
+    console.log('updated board before setting state', board)
+
+    let tempBoard = board;
+    setBoard(tempBoard);
+
+    console.log('updated board after setting state', board)
+
+    
+    // setBoard(board => {
+    //   // if x, set to x
+    //   if(isTurnOfX){
+    //     board[row][column] = 'X';
+    //   } else {
+    //     // else set to O
+    //     board[row][column] = 'O';
+    //   }
+      
+    //   // return the updated board
+    //   return board;
+    // })
   }
+
+  // console.log(board)
+
+
+  useEffect(() => {
+    // do what? 
+    const hasWinner = checkForWinner(board)
+    console.log(hasWinner);
+    console.log('board changed from use effect');
+    updatePlayerTurn()
+  }, [board])
+
+  const updatePlayerTurn = () => {
+     //update the turn to the opposite of whoever slected last
+     setIsTurnOfX(!isTurnOfX);
+  }
+
+
+  function checkForWinner (board) {
+    // first row
+    if(board[0][0] === board[0][1] === board[0][2]){
+      return true;
+    }
+    // second row
+    if(board[1][0] === board[1][1] === board[1][2]){
+      return true;
+    }
+    // third row
+    if(board[2][0] === board[2][1] === board[2][2]){
+      return true;
+    }
+  
+    // columns
+    if(board[0][0] === board[1][0] === board[2][0]){
+      return true;
+    }
+    if(board[0][1] === board[1][1] === board[2][1]){
+      return true;
+    }
+    if(board[0][2] === board[1][2] === board[2][2]){
+      return true;
+    }
+  
+    // top left to bottom right
+    if(board[0][0] === board[1][1] === board[2][2]){
+      return true;
+    }
+    // top right to bottom left
+    if(board[0][2] === board[1][1] === board[2][0]){
+      return true;
+    }
+  
+    return false;
+  }
+
 
   return (
     <div className="app">
